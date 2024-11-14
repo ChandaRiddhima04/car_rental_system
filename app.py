@@ -41,18 +41,18 @@ app.config['SECRET_KEY'] = 'mysecretkey'
 db.init_app(app)
 with app.app_context():
     db.create_all()
-# Home Route
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Route to list all cars
+
 @app.route('/cars')
 def list_cars():
     cars = Car.query.all()
     return render_template('list_cars.html', cars=cars)
 
-# Route to add a new car
+
 @app.route('/add_car', methods=['GET', 'POST'])
 def add_car():
     form = CarForm()
@@ -64,17 +64,17 @@ def add_car():
     return render_template('add_car.html', form=form)
 
 
-# Route to view car details along with reservations and payments
+
 @app.route('/car/<int:car_id>', methods=['GET', 'POST'])
 def car_details(car_id):
     car = Car.query.get_or_404(car_id)
     reservation_form = ReservationForm()
     payment_form = PaymentForm()
 
-    # Populate the customer dropdown with all customers from the database
+   
     reservation_form.customer_id.choices = [(customer.id, customer.name) for customer in Customer.query.all()]
 
-    # Handle Reservation form submission
+   
     if reservation_form.validate_on_submit():
         reservation = Reservation(
             car_id=car.id,
@@ -90,10 +90,10 @@ def car_details(car_id):
         print("Form not valid. Validation errors:")
         for field, errors in reservation_form.errors.items():
             print(f"{field}: {errors}")
-    # Populate the reservation dropdown with all reservations for this car
+   
     payment_form.reservation_id.choices = [(reservation.id, f"Reservation from {reservation.start_date} to {reservation.end_date}") for reservation in Reservation.query.filter_by(car_id=car.id).all()]
 
-    # Handle Payment form submission
+    
     if payment_form.validate_on_submit():
         print(f"Reservation ID: {payment_form.reservation_id.data}")
         print(f"Amount: {payment_form.amount.data}")
@@ -108,14 +108,14 @@ def car_details(car_id):
         return redirect(url_for('car_details', car_id=car.id))
 
 
-    # Fetch car reservations and payments
+   
     reservations = Reservation.query.filter_by(car_id=car.id).all()
     payments = Payment.query.filter(Payment.reservation_id.in_([r.id for r in reservations])).all()
 
     return render_template('car.html', car=car, reservations=reservations, payments=payments, 
                            reservation_form=reservation_form, payment_form=payment_form)
 
-# Route to update car details
+
 @app.route('/update_car/<int:car_id>', methods=['GET', 'POST'])
 def update_car(car_id):
     car = Car.query.get_or_404(car_id)
@@ -128,10 +128,10 @@ def update_car(car_id):
         return redirect(url_for('car_details', car_id=car.id))
     return render_template('update_car.html', form=form, car=car)
 
-# Route to add a new customer
 
 
-# Route to add a new customer
+
+
 @app.route('/add_customer', methods=['GET', 'POST'])
 def add_customer():
     form = CustomerForm()
@@ -142,13 +142,13 @@ def add_customer():
         return redirect(url_for('list_customers'))
     return render_template('add_customer.html', form=form)
 
-# Route to list all customers
+
 @app.route('/customers')
 def list_customers():
     customers = Customer.query.all()
     return render_template('list_customers.html', customers=customers)
 
-# Route to view a specific customer
+
 @app.route('/customer/<int:customer_id>')
 def view_customer(customer_id):
     customer = Customer.query.get_or_404(customer_id)
@@ -157,7 +157,7 @@ def view_customer(customer_id):
     return render_template('view_customer.html', customer=customer, reservations=reservations, payments=payments)
 
 
-# Route to list all cars (for easy access to car list)
+
 @app.route('/list_cars')
 def list_all_cars():
     cars = Car.query.all()
